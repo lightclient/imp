@@ -6,7 +6,7 @@ edition = "2018"
 license = "Apache-2.0"
 description = "In-place sparse merkle tree multiproof database"
 repository = "https://github.com/lightclient/imp"
-keywords = ["merkle proof", "multiproof", "ethereum 2.0", "eth2", "execution environment"]
+keywords = ["blockchain", "merkle-proof", "multiproof", "ethereum", "ee"]
 
 [dependencies]
 arrayref = "0.3.5"
