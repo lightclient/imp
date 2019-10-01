@@ -11,7 +11,7 @@ use core::ops::{Add, BitAnd, Shr, Sub};
 
 pub struct Imp<'a, T>
 where
-    T: Clone + Shr<usize, Output = T> + BitAnd<Output = T> + Add + Sub + PartialEq + From<usize>,
+    T: Clone + Shr<usize, Output = T> + BitAnd<Output = T> + Add + Sub + PartialEq + From<u8>,
 {
     pub offsets: &'a [u8],
     pub db: &'a mut [u8],
@@ -21,7 +21,7 @@ where
 
 impl<'a, T> Imp<'a, T>
 where
-    T: Clone + Shr<usize, Output = T> + BitAnd<Output = T> + Add + Sub + PartialEq + From<usize>,
+    T: Clone + Shr<usize, Output = T> + BitAnd<Output = T> + Add + Sub + PartialEq + From<u8>,
 {
     pub fn new(data: &'a mut [u8], height: usize) -> Self {
         // Read the number of offsets
