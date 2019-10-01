@@ -3,6 +3,10 @@ name = "imp"
 version = "0.0.0"
 authors = ["Matt Garnett <14004106+lightclient@users.noreply.github.com>"]
 edition = "2018"
+license = "Apache-2.0"
+description = "In-place sparse merkle tree multiproof database"
+repository = "https://github.com/lightclient/imp"
+keywords = ["merkle proof", "multiproof", "ethereum 2.0", "eth2", "execution environment"]
 
 [dependencies]
 arrayref = "0.3.5"
