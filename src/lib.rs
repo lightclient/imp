@@ -61,8 +61,8 @@ where
         let mut position = 0u64;
         let mut offset = 0u64;
 
-        for i in 1..(self.height + 4) {
-            let bit = (index.clone() >> (self.height + 3 - i)) & 1.into();
+        for i in 1..(self.height + 1) {
+            let bit = (index.clone() >> (self.height - i)) & 1.into();
 
             if bit == 0.into() {
                 position += 1;
@@ -200,7 +200,7 @@ mod tests {
 
         offsets.extend(vec![0u8; 32 * 4]);
 
-        let mem = Imp::<U256>::new(&mut offsets, 1);
+        let mem = Imp::<U256>::new(&mut offsets, 4);
 
         assert_eq!(mem.lookup((10 << 1).into()), 1);
         assert_eq!(mem.lookup((11 << 1).into()), 2);
@@ -211,13 +211,57 @@ mod tests {
     #[test]
     fn lookup_single_account() {
         let mut proof = get_proof();
-        let mem = Imp::<U256>::new(&mut proof, 1);
+        let mem = Imp::<U256>::new(&mut proof, 4);
 
         assert_eq!(mem.lookup((9 << 1).into()), 2);
         assert_eq!(mem.lookup((10 << 1).into()), 3);
         assert_eq!(mem.lookup((11 << 1).into()), 4);
         assert_eq!(mem.lookup(16.into()), 0);
         assert_eq!(mem.lookup(17.into()), 1);
+    }
+
+    #[test]
+    fn lookup_colored_account() {
+        // indexes = [16, 17, 9, 40, 41, 42, 43, 11, 3]
+        let offsets: Vec<u8> = vec![9, 8, 3, 2, 1, 4, 2, 1, 1]
+            .iter()
+            .fold(vec![], |mut acc, x| {
+                let x = *x as u64;
+                acc.extend(&x.to_le_bytes());
+                acc
+            });
+
+        let proof: Vec<u8> = vec![
+            h256(0),
+            h256(0),
+            h256(1), // nonce
+            h256(1), // red balance
+            h256(0), // green balance
+            h256(0), // blue balance
+            zh(0),   // padding
+            zh(0),   // padding
+            zh(0),
+        ]
+        .iter()
+        .fold(vec![], |mut acc, x| {
+            acc.extend(x);
+            acc
+        });
+
+        let mut ret = offsets;
+        ret.extend(proof);
+
+        let mut proof = ret;
+        let mem = Imp::<U256>::new(&mut proof, 5);
+
+        assert_eq!(mem.lookup((16 << 1).into()), 0);
+        assert_eq!(mem.lookup((17 << 1).into()), 1);
+        assert_eq!(mem.lookup((9 << 2).into()), 2);
+        assert_eq!(mem.lookup(40.into()), 3);
+        assert_eq!(mem.lookup(41.into()), 4);
+        assert_eq!(mem.lookup(42.into()), 5);
+        assert_eq!(mem.lookup(43.into()), 6);
+        assert_eq!(mem.lookup((11 << 2).into()), 7);
     }
 
     #[test]
@@ -234,7 +278,7 @@ mod tests {
 
         offsets.extend(vec![0u8; 32 * 7]);
 
-        let mem = Imp::<U256>::new(&mut offsets, 1);
+        let mem = Imp::<U256>::new(&mut offsets, 4);
 
         for i in 0..7 {
             assert_eq!(mem.lookup(((i + 8) << 1).into()), i as usize);
@@ -247,7 +291,7 @@ mod tests {
         let offsets: Vec<u64> = vec![4, 3, 1, 1];
         let proof = vec![zh(1), zh(0), zh(0), zh(2)];
         let mut data = build_data(offsets, proof);
-        let mut mem = Imp::<U256>::new(&mut data, 1);
+        let mut mem = Imp::<U256>::new(&mut data, 4);
         assert_eq!(mem.root(), zh(3))
     }
 
@@ -257,7 +301,7 @@ mod tests {
         let offsets: Vec<u64> = vec![8, 4, 2, 1, 1, 2, 1, 1];
         let proof = vec![zh(0), zh(0), zh(0), zh(0), zh(0), zh(0), zh(0), zh(0)];
         let mut data = build_data(offsets, proof);
-        let mut mem = Imp::<U256>::new(&mut data, 1);
+        let mut mem = Imp::<U256>::new(&mut data, 4);
         assert_eq!(mem.root(), zh(3))
     }
 
@@ -282,7 +326,7 @@ mod tests {
         ];
 
         let mut data = build_data(offsets, proof);
-        let mut mem = Imp::<U256>::new(&mut data, 1);
+        let mut mem = Imp::<U256>::new(&mut data, 4);
         assert_eq!(mem.root(), zh(12))
     }
 }
